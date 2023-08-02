@@ -1,0 +1,136 @@
+zabbix_export:
+  version: '6.4'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: 51cdc494980e48aaa3bb3a546a413d89
+      template: 'Ruckus ICX Switch by SNMP'
+      name: 'Ruckus ICX Switch by SNMP'
+      groups:
+        - name: Templates
+      items:
+        - uuid: a81113cda22342f49c50f4e042077530
+          name: 'System Description'
+          type: SNMP_AGENT
+          snmp_oid: sysDescr.0
+          key: 'system.description[sysDescr.0]'
+          delay: 30m
+          trends: '0'
+          value_type: TEXT
+        - uuid: d2529c6bab564c43ba48c40d1f7fe31b
+          name: 'System Name'
+          type: SNMP_AGENT
+          snmp_oid: sysName.0
+          key: 'system.name[sysName.0]'
+          delay: 30m
+          trends: '0'
+          value_type: TEXT
+          inventory_link: NAME
+        - uuid: 839cb0fcbe62424387674136b57d380f
+          name: Uptime
+          type: SNMP_AGENT
+          snmp_oid: sysUpTime.0
+          key: 'system.Uptime[sysUptime.0]'
+          units: s
+      discovery_rules:
+        - uuid: e7e9987851f4490dbd998bd8ace36bd4
+          name: 'Fan Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#CHASSIS.FANUNIT},.1.3.6.1.4.1.1991.1.1.1.3.2.1.1,{#CHASSIS.FANINDEX},.1.3.6.1.4.1.1991.1.1.1.3.2.1.2,{#CHASSIS.FANSTATUS},.1.3.6.1.4.1.1991.1.1.1.3.2.1.4]'
+          key: discovery.fans
+          item_prototypes:
+            - uuid: 0147530797c9419ebdee090cb0f89f9a
+              name: 'Chassis {#CHASSIS.FANUNIT}: Fan {#CHASSIS.FANINDEX}'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.1991.1.1.1.3.2.1.4.{#SNMPINDEX}'
+              key: 'chassis.fan[CHASSIS.FANSTATUS,{#SNMPINDEX}]'
+              trends: '0'
+              value_type: TEXT
+              preprocessing:
+                - type: STR_REPLACE
+                  parameters:
+                    - '1'
+                    - Unknown
+                - type: STR_REPLACE
+                  parameters:
+                    - '2'
+                    - Normal
+                - type: STR_REPLACE
+                  parameters:
+                    - '3'
+                    - Faulty
+        - uuid: 01c6bb3327c146398426d3c4939be05f
+          name: 'Power Supply Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#CHASSIS.PWRSPLYUNIT},.1.3.6.1.4.1.1991.1.1.1.2.2.1.1,{#CHASSIS.PWRSPLYINDEX},.1.3.6.1.4.1.1991.1.1.1.2.2.1.2,{#CHASSIS.PWRSPLYSTATUS},.1.3.6.1.4.1.1991.1.1.1.2.2.1.4]'
+          key: discovery.powersupply
+          item_prototypes:
+            - uuid: a53bba7d486d44baa5d25d4e05c71882
+              name: 'Chassis {#CHASSIS.PWRSPLYUNIT}: Power Supply {#CHASSIS.PWRSPLYINDEX}'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.1991.1.1.1.2.2.1.4.{#SNMPINDEX}'
+              key: 'chassis.powersupply[CHASSIS.PWRSPLYSTATUS,{#SNMPINDEX}]'
+              trends: '0'
+              value_type: TEXT
+              preprocessing:
+                - type: STR_REPLACE
+                  parameters:
+                    - '1'
+                    - Unknown
+                - type: STR_REPLACE
+                  parameters:
+                    - '2'
+                    - Normal
+                - type: STR_REPLACE
+                  parameters:
+                    - '3'
+                    - Faulty
+              trigger_prototypes:
+                - uuid: aabd3ba2b6e64bc99906111f2bc87659
+                  expression: 'last(/Ruckus ICX Switch by SNMP/chassis.powersupply[CHASSIS.PWRSPLYSTATUS,{#SNMPINDEX}])="Faulty"'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Ruckus ICX Switch by SNMP/chassis.powersupply[CHASSIS.PWRSPLYSTATUS,{#SNMPINDEX}])="Normal"'
+                  name: 'Chassis {#CHASSIS.PWRSPLYUNIT} Power supply {#CHASSIS.PWRSPLYINDEX}: Faulty Power Supply'
+                  priority: HIGH
+                - uuid: 83323794469c40e2b2527d4a2a03bdeb
+                  expression: 'last(/Ruckus ICX Switch by SNMP/chassis.powersupply[CHASSIS.PWRSPLYSTATUS,{#SNMPINDEX}])="Unknown"'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Ruckus ICX Switch by SNMP/chassis.powersupply[CHASSIS.PWRSPLYSTATUS,{#SNMPINDEX}])="Normal"'
+                  name: 'Chassis {#CHASSIS.PWRSPLYUNIT} Power supply {#CHASSIS.PWRSPLYINDEX}: Power Supply Status unknown'
+                  priority: INFO
+        - uuid: 9df09f126890455c885cf147a75b8d97
+          name: 'Stacking Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#CHASSIS.STACKUNIT},.1.3.6.1.4.1.1991.1.1.3.31.2.2.1.1,{#CHASSIS.STACKMEMROLE},.1.3.6.1.4.1.1991.1.1.3.31.2.2.1.2,{#CHASSIS.STACKMEMDESC},.1.3.6.1.4.1.1991.1.1.3.31.2.2.1.6,{#CHASSIS.STACKMEMP1STATE}, .1.3.6.1.4.1.1991.1.1.3.31.2.2.1.8,{#CHASSIS.STACKMEMP2STATE}, .1.3.6.1.4.1.1991.1.1.3.31.2.2.1.10]'
+          key: discovery.stacking
+          item_prototypes:
+            - uuid: d1ac8530351e4197ae72e5869c964cfc
+              name: 'Stack Unit {#SNMPINDEX}: Role'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.1991.1.1.3.31.2.2.1.2.{#SNMPINDEX}'
+              key: 'chassis.stacking[snStackingOperUnitRole.{#SNMPINDEX}]'
+              trends: '0'
+              value_type: TEXT
+        - uuid: 77f45761dbdc45808d9ef7e11a4acb5d
+          name: 'Interface Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#IF.OPERSTATUS},.1.3.6.1.2.1.2.2.1.8,{#IF.DESC},.1.3.6.1.2.1.2.2.1.2,{#IF.ADMINSTATUS},.1.3.6.1.2.1.2.2.1.7]'
+          key: net.if.discovery
+          item_prototypes:
+            - uuid: ddff581b1374459fac4a86a7810ea765
+              name: 'Interface {#IF.DESC}: Admin Status'
+              type: SNMP_AGENT
+              snmp_oid: 'ifAdminStatus.{#SNMPINDEX}'
+              key: 'net.if.in[ifAdminStatus.{#SNMPINDEX}]'
+            - uuid: 3588bc8b61df4b0a9d55025b98b66d34
+              name: 'Interface {#IF.DESC}: Operational Status'
+              type: SNMP_AGENT
+              snmp_oid: 'ifOperStatus.{#SNMPINDEX}'
+              key: 'net.if.in[ifOperStatus.{#SNMPINDEX}]'
+            - uuid: 84c95b2007494f8ea045d985bb0f5051
+              name: 'Interface {#IF.DESC}: Interface Speed'
+              type: SNMP_AGENT
+              snmp_oid: 'ifSpeed.{#SNMPINDEX}'
+              key: 'net.if.in[ifSpeed.{#SNMPINDEX}]'
+              units: bps
