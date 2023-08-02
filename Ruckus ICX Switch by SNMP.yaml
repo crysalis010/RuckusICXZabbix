@@ -112,6 +112,26 @@ zabbix_export:
               key: 'chassis.stacking[snStackingOperUnitRole.{#SNMPINDEX}]'
               trends: '0'
               value_type: TEXT
+        - uuid: 7be1a081eebd430c8a534e646240b0e1
+          name: 'Temperature Sensors'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#CHASSISUNIT},.1.3.6.1.4.1.1991.1.1.1.4.1.1.1]'
+          key: discovery.tempsensors
+          item_prototypes:
+            - uuid: ae909a09cc384ca8a4c4b1e7b6609318
+              name: 'Chassis {#CHASSISUNIT}: Actual Temperature'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.1991.1.1.1.4.1.1.4.{#SNMPINDEX}'
+              key: 'chassis.powersupply[snChasUnitActualTemperature,{#SNMPINDEX}]'
+          graph_prototypes:
+            - uuid: 9bd276baabf94258968fa3cfdefd3df0
+              name: 'Chassis {#CHASSISUNIT}: Actual Temperature'
+              graph_items:
+                - color: 199C0D
+                  calc_fnc: ALL
+                  item:
+                    host: 'Ruckus ICX Switch by SNMP'
+                    key: 'chassis.powersupply[snChasUnitActualTemperature,{#SNMPINDEX}]'
         - uuid: 77f45761dbdc45808d9ef7e11a4acb5d
           name: 'Interface Discovery'
           type: SNMP_AGENT
@@ -121,16 +141,138 @@ zabbix_export:
             - uuid: ddff581b1374459fac4a86a7810ea765
               name: 'Interface {#IF.DESC}: Admin Status'
               type: SNMP_AGENT
-              snmp_oid: 'ifAdminStatus.{#SNMPINDEX}'
-              key: 'net.if.in[ifAdminStatus.{#SNMPINDEX}]'
-            - uuid: 3588bc8b61df4b0a9d55025b98b66d34
-              name: 'Interface {#IF.DESC}: Operational Status'
+              snmp_oid: '.1.3.6.1.4.1.1991.1.1.3.3.1.1.8.{#SNMPINDEX}'
+              key: 'net.if.in[snSwPortInfoAdminStatus.{#SNMPINDEX}]'
+              trends: '0'
+              value_type: TEXT
+              preprocessing:
+                - type: STR_REPLACE
+                  parameters:
+                    - '1'
+                    - Up
+                - type: STR_REPLACE
+                  parameters:
+                    - '2'
+                    - Down
+            - uuid: 9be14d747a6e400bbcc1199793c2f6d6
+              name: 'Interface {#IF.DESC}: Link Status'
               type: SNMP_AGENT
-              snmp_oid: 'ifOperStatus.{#SNMPINDEX}'
-              key: 'net.if.in[ifOperStatus.{#SNMPINDEX}]'
+              snmp_oid: '.1.3.6.1.4.1.1991.1.1.3.3.1.1.9.{#SNMPINDEX}'
+              key: 'net.if.in[snSwPortInfoLinkstatus.{#SNMPINDEX}]'
+              trends: '0'
+              value_type: TEXT
+              preprocessing:
+                - type: STR_REPLACE
+                  parameters:
+                    - '1'
+                    - Up
+                - type: STR_REPLACE
+                  parameters:
+                    - '2'
+                    - Down
             - uuid: 84c95b2007494f8ea045d985bb0f5051
               name: 'Interface {#IF.DESC}: Interface Speed'
               type: SNMP_AGENT
-              snmp_oid: 'ifSpeed.{#SNMPINDEX}'
-              key: 'net.if.in[ifSpeed.{#SNMPINDEX}]'
+              snmp_oid: '.1.3.6.1.4.1.1991.1.1.3.3.1.1.5.{#SNMPINDEX}'
+              key: 'net.if.in[snSwPortInfoSpeed.{#SNMPINDEX}]'
+              trends: '0'
+              value_type: TEXT
+              preprocessing:
+                - type: STR_REPLACE
+                  parameters:
+                    - '0'
+                    - None
+                - type: STR_REPLACE
+                  parameters:
+                    - '1'
+                    - Auto
+                - type: STR_REPLACE
+                  parameters:
+                    - '2'
+                    - 10M
+                - type: STR_REPLACE
+                  parameters:
+                    - '3'
+                    - 100M
+                - type: STR_REPLACE
+                  parameters:
+                    - '4'
+                    - 1G
+                - type: STR_REPLACE
+                  parameters:
+                    - '5'
+                    - 1GM
+                - type: STR_REPLACE
+                  parameters:
+                    - '7'
+                    - 10G
+                - type: STR_REPLACE
+                  parameters:
+                    - '13'
+                    - 40G
+                - type: STR_REPLACE
+                  parameters:
+                    - '16'
+                    - 100G
+                - type: STR_REPLACE
+                  parameters:
+                    - '17'
+                    - 25G
+                - type: STR_REPLACE
+                  parameters:
+                    - '14'
+                    - 2.5G
+                - type: STR_REPLACE
+                  parameters:
+                    - '15'
+                    - 5G
+            - uuid: 054501efc0da4476b406acb64500a431
+              name: 'Interface {#IF.DESC}: In BitsPerSec'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.1991.1.1.3.3.1.1.42.{#SNMPINDEX}'
+              key: 'net.if.in[snSwPortStatsInBitsPerSec.{#SNMPINDEX}]'
               units: bps
+            - uuid: 557e274fa2aa4f79b517ac42fc088fa3
+              name: 'Interface {#IF.DESC}: In Utilization'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.1991.1.1.3.3.1.1.46.{#SNMPINDEX}'
+              key: 'net.if.in[snSwPortStatsInUtilization.{#SNMPINDEX}]'
+            - uuid: 3b76670de4374f1284e37437eac5e78c
+              name: 'Interface {#IF.DESC}: Out BitsPerSec'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.1991.1.1.3.3.1.1.43.{#SNMPINDEX}'
+              key: 'net.if.in[snSwPortStatsOutBitsPerSec.{#SNMPINDEX}]'
+            - uuid: 2887d57826e146be86585fe607858fbe
+              name: 'Interface {#IF.DESC}: Out Utilization'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.1991.1.1.3.3.1.1.47.{#SNMPINDEX}'
+              key: 'net.if.in[snSwPortStatsOutUtilization.{#SNMPINDEX}]'
+          graph_prototypes:
+            - uuid: 6c163940dd8b41feba9da39189da3b36
+              name: 'Interface {#IF.DESC}: In/Out BPS'
+              graph_items:
+                - color: 199C0D
+                  calc_fnc: ALL
+                  item:
+                    host: 'Ruckus ICX Switch by SNMP'
+                    key: 'net.if.in[snSwPortStatsInBitsPerSec.{#SNMPINDEX}]'
+                - sortorder: '1'
+                  color: F63100
+                  calc_fnc: ALL
+                  item:
+                    host: 'Ruckus ICX Switch by SNMP'
+                    key: 'net.if.in[snSwPortStatsOutBitsPerSec.{#SNMPINDEX}]'
+            - uuid: f9a2852b48bc41169ffe4f886d138841
+              name: 'Interface {#IF.DESC}: Utilization'
+              graph_items:
+                - color: 199C0D
+                  calc_fnc: ALL
+                  item:
+                    host: 'Ruckus ICX Switch by SNMP'
+                    key: 'net.if.in[snSwPortStatsInUtilization.{#SNMPINDEX}]'
+                - sortorder: '1'
+                  color: F63100
+                  calc_fnc: ALL
+                  item:
+                    host: 'Ruckus ICX Switch by SNMP'
+                    key: 'net.if.in[snSwPortStatsOutUtilization.{#SNMPINDEX}]'
